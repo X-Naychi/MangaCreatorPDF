@@ -3,7 +3,11 @@ from colorama import init as colorInit, Style, Fore, Back
 
 colorInit()
 
-print(Style.BRIGHT + Fore.CYAN + 'MangaCreatorPDF v1.2\nFor files with Mangal1b\n' + Style.RESET_ALL)
+print(Style.BRIGHT + Fore.CYAN + 'MangaCreatorPDF v1.2 Beta\nFor files with Mangal1b\n' + Style.RESET_ALL)
+print(Fore.RED + 'ПРЕДУПРЕЖДЕНИЕ: Данная версия скрипта может сформировать лишь 9 томов.' + Style.RESET_ALL)
+print(Fore.RED + 'Другими словами, работать она может лишь с 1 по 9 том, с 10 по 19 том, и т.д.' + Style.RESET_ALL)
+print(Fore.RED + 'Иначе в первый том попадут 10-19 тома, во второй 20-29 тома и т.д.' + Style.RESET_ALL)
+print(Fore.RED + 'В ближайшее время это будет исправлено!' + Style.RESET_ALL + '\n')
 
 def askDir():
     print('Введи путь к каталогу:')
