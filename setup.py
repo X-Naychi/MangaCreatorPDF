@@ -1,8 +1,8 @@
-import os 
-print('MangaCreatorPDF v1.1\n')
+import os
+import shutil
+#import colorama
 
-part = 0
-sum_pages = 0
+print('MangaCreatorPDF v1.1\n')
 
 def createDir(name):
     try: 
@@ -10,11 +10,27 @@ def createDir(name):
     except FileExistsError:
         print('Папка "{}" уже существует.'.format(name))
 
-# print('Введи путь к каталогу:')
-# use_dir = input()
-use_dir = 'titles/Kawaii Dake Janai Onnanoko'
-name_title = use_dir.split('/')[-1]
+def deleteSortedPage(dirs):
+    user_answer = input('\nУдалить отсортированные страницы манги? [Y/n]: ')
+    if user_answer in ['Y', 'y', 'Д', 'д']:
+        for item in dirs:
+            shutil.rmtree(item, ignore_errors=True)
+        print('Удалено.')
+    elif user_answer in ['N', 'n', 'Н', 'н']:
+        print('\nОтсортированные страницы и PDF файлы находяться по этому пути:\n"{}".\n'.format(os.getcwd()))
+    else:
+        print('\nВведён не корректный ответ. Повторите ещё раз... ')
+        deleteSortedPage(dirs)
+        
 
+# variables
+print('Введи путь к каталогу:')
+use_dir = input()
+name_title = use_dir.split('/')[-1]
+part = 0
+sum_pages = 0
+
+# Running algorithm
 os.chdir(use_dir)
 list_dirs = os.listdir()
 list_dirs.sort()
@@ -36,7 +52,7 @@ for item in list_dirs:
 
         i = 0
         while next_page <= len_files-1:
-            try:
+            try:                                    # EDIT!
                 name_file = str(next_page) + '.jpeg'
                 os.replace(item + '/' + str(i) + '.jpeg', name_title + '/' + partDir + '/' + name_file.zfill(10))
             except FileNotFoundError:
@@ -61,7 +77,7 @@ for item in list_dirs:
         createDir(name_title + '/' + partDir)
         
         for f in files:
-            if not f.endswith(".png"):
+            if not f.endswith(".png"):              # EDIT!
                 os.replace(item + '/' + f, name_title + '/' + partDir + '/' + f.zfill(10))
             else:
                 os.replace(item + '/' + f, name_title + '/' + partDir + '/' + f.zfill(9))
@@ -69,7 +85,7 @@ for item in list_dirs:
 
     os.rmdir(item)
 
-print('Выполнена сортировка страниц и удалены ненужные папки.')
+print('Выполнена сортировка страниц и удалены ненужные папки.\n')
     
 import img2pdf
 
@@ -78,13 +94,18 @@ list_dirs = os.listdir()
 list_dirs.sort()
 
 for item in list_dirs:
-    files = os.listdir(item)
-    files.sort()
+    try:
+        files = os.listdir(item)
+        files.sort()
+    except NotADirectoryError:
+        continue
 
     with open(item+".pdf", "wb") as f:
         f.write(img2pdf.convert([item+'/'+i for i in files]))
     print('Создан файл "' + item+ '.pdf"')
 
+deleteSortedPage(list_dirs)
+
 print('\nКонвертирование манги в PDF завершено.')
-print('Отсортированные страницы и PDF файлы находяться по этому пути:\n"{}".\nВсего обработано {} тома(-ов) и {} страниц(-ы).\n\n'.format(os.getcwd(), part, sum_pages))
-input('Для завершения программы, нажмите любую клавишу...')
+print('Всего обработано {} тома(-ов) и {} страниц(-ы).\n'.format(part, sum_pages))
+input('Для завершения программы, нажмите Enter...')
