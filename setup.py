@@ -1,8 +1,9 @@
-import os
-import shutil
-#import colorama
+import os, shutil, img2pdf
+from colorama import init as colorInit, Style, Fore, Back
 
-print('MangaCreatorPDF v1.1\n')
+colorInit()
+
+print(Style.BRIGHT + Fore.CYAN + 'MangaCreatorPDF v1.2\n' + Style.RESET_ALL)
 
 def createDir(name):
     try: 
@@ -10,22 +11,34 @@ def createDir(name):
     except FileExistsError:
         print('Папка "{}" уже существует.'.format(name))
 
+def askDir():
+    print('Введи путь к каталогу:')
+    data = input()
+    if not data:
+        print(Fore.RED + 'Нельзя вводить пустоту. Повтори ещё раз...\n' + Fore.RESET)
+        return askDir()
+    elif not os.path.isdir(data):
+        print(Fore.RED + 'Эта папка не найдена. Проверь и повтори ещё раз...\n' + Fore.RESET)
+        return askDir()
+    else:
+        return data
+        
+
 def deleteSortedPage(dirs):
     user_answer = input('\nУдалить отсортированные страницы манги? [Y/n]: ')
     if user_answer in ['Y', 'y', 'Д', 'д']:
         for item in dirs:
             shutil.rmtree(item, ignore_errors=True)
-        print('Удалено.')
+        print(Back.RED + Fore.BLACK + 'Удалено!' + Style.RESET_ALL)
     elif user_answer in ['N', 'n', 'Н', 'н']:
-        print('\nОтсортированные страницы и PDF файлы находяться по этому пути:\n"{}".\n'.format(os.getcwd()))
+        print('\nОтсортированные страницы и PDF файлы находяться по этому пути:\n"{}".\n'.format(Style.BRIGHT + Fore.YELLOW + os.getcwd() + Style.RESET_ALL))
     else:
-        print('\nВведён не корректный ответ. Повторите ещё раз... ')
+        print('\nВведён не корректный ответ. Повтори ещё раз... ')
         deleteSortedPage(dirs)
         
 
 # variables
-print('Введи путь к каталогу:')
-use_dir = input()
+use_dir = askDir()
 name_title = use_dir.split('/')[-1]
 part = 0
 sum_pages = 0
@@ -61,7 +74,7 @@ for item in list_dirs:
                     os.replace(item + '/' + str(i) + '.png', name_title + '/' + partDir + '/' + name_file.zfill(9))
                 else:
                     print('Файла "' + item+'/'+str(i)+'.png" - не существует!')
-                    print('Аварийное завершение программы!')
+                    print(Back.RED + Fore.BLACK + 'Аварийное завершение программы!' + Style.RESET_ALL)
                     exit() 
             next_page += 1
             i += 1
@@ -86,8 +99,8 @@ for item in list_dirs:
     os.rmdir(item)
 
 print('Выполнена сортировка страниц и удалены ненужные папки.\n')
-    
-import img2pdf
+
+# CREATING PDF
 
 os.chdir(name_title)
 list_dirs = os.listdir()
@@ -106,6 +119,6 @@ for item in list_dirs:
 
 deleteSortedPage(list_dirs)
 
-print('\nКонвертирование манги в PDF завершено.')
-print('Всего обработано {} тома(-ов) и {} страниц(-ы).\n'.format(part, sum_pages))
-input('Для завершения программы, нажмите Enter...')
+print('\n' + Back.GREEN + Fore.BLACK + 'Конвертирование манги в PDF завершено' + Style.RESET_ALL)
+print('Всего обработано {} тома(-ов) и {} страниц(-ы)'.format(part, sum_pages))
+input('\nДля завершения программы, нажмите Enter...')
