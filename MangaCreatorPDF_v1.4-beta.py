@@ -1,10 +1,10 @@
 import os, shutil, img2pdf
-from posix import listdir
+from os.path import normpath
 from colorama import init as colorInit, Style, Fore, Back
 
 colorInit()
 
-print(Style.BRIGHT + Fore.CYAN + 'MangaCreatorPDF v1.3\nFor files with Mangal1b\n' + Style.RESET_ALL)
+print(Style.BRIGHT + Fore.CYAN + 'MangaCreatorPDF v1.4-beta\nFor files with Mangal1b\n' + Style.RESET_ALL)
 
 def askDir():
     print('Введи путь к каталогу:')
@@ -16,7 +16,7 @@ def askDir():
         print(Fore.RED + 'Эта папка не найдена. Проверь и повтори ещё раз...\n' + Fore.RESET)
         return askDir()
     else:
-        return data
+        return normpath(data)
 
 def askPart():
     print('\nВведи c какого тома начинать делать мангу в PDF:')
@@ -49,7 +49,7 @@ def createDir(name):
 
 # variables
 use_dir = askDir()
-name_title = use_dir.split('/')[-1]
+name_title = os.path.basename(use_dir)
 part = askPart()-1
 sum_pages = 0
 count_del_png = 0
@@ -80,11 +80,11 @@ for item in list_dirs:
         while next_page <= len_files-1:
             try:                                # Move JPEG
                 name_file = str(next_page) + '.jpeg'
-                os.replace(item + '/' + str(i) + '.jpeg', name_title + '/' + partDir + '/' + name_file.zfill(10))
+                os.replace(normpath(item + '/' + str(i) + '.jpeg'), normpath(name_title + '/' + partDir + '/' + name_file.zfill(10)))
             except FileNotFoundError:
                 if str(i)+'.png' in files:      # DELETE PNG
                     name_file = str(next_page) + '.png'
-                    os.remove(item + '/' + str(i) + '.png')
+                    os.remove(normpath(item + '/' + str(i) + '.png'))
                     count_del_png += 1
                 else:                           # ERROR NOT FOUNT
                     print('Файла "' + item+'/'+str(i)+'.png" - не существует!')
@@ -101,13 +101,13 @@ for item in list_dirs:
         sum_pages += len(files) # Counter for statistic
         partDir = name_title + ' Том ' + str(part) # Name for new directory
 
-        createDir(name_title + '/' + partDir)
+        createDir(normpath(name_title + '/' + partDir))
         
         for f in files:
             if not f.endswith(".png"):              # Move JPEG
-                os.replace(item + '/' + f, name_title + '/' + partDir + '/' + f.zfill(10))
+                os.replace(normpath(item + '/' + f), normpath(name_title + '/' + partDir + '/' + f.zfill(10)))
             else:                                   # DELETE PNG
-                os.remove(item + '/' + f)
+                os.remove(normpath(item + '/' + f))
                 count_del_png += 1 # Counter for statistic
             next_page += 1
 
@@ -131,7 +131,7 @@ for item in list_dirs:
         continue
 
     with open(item+".pdf", "wb") as f:
-        f.write(img2pdf.convert([item+'/'+i for i in files]))
+        f.write(img2pdf.convert([normpath(item+'/'+i) for i in files]))
     print('Создан файл "' + item+ '.pdf"')
 
 deleteSortedPage(list_dirs)
