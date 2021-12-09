@@ -1,13 +1,10 @@
 import os, shutil, img2pdf
+from posix import listdir
 from colorama import init as colorInit, Style, Fore, Back
 
 colorInit()
 
-print(Style.BRIGHT + Fore.CYAN + 'MangaCreatorPDF v1.2 Beta\nFor files with Mangal1b\n' + Style.RESET_ALL)
-print(Fore.RED + 'ПРЕДУПРЕЖДЕНИЕ: Данная версия скрипта может сформировать лишь 9 томов.' + Style.RESET_ALL)
-print(Fore.RED + 'Другими словами, работать она может лишь с 1 по 9 том, с 10 по 19 том, и т.д.' + Style.RESET_ALL)
-print(Fore.RED + 'Иначе в первый том попадут 10-19 тома, во второй 20-29 тома и т.д.' + Style.RESET_ALL)
-print(Fore.RED + 'В ближайшее время это будет исправлено!' + Style.RESET_ALL + '\n')
+print(Style.BRIGHT + Fore.CYAN + 'MangaCreatorPDF v1.3\nFor files with Mangal1b\n' + Style.RESET_ALL)
 
 def askDir():
     print('Введи путь к каталогу:')
@@ -57,13 +54,13 @@ part = askPart()-1
 sum_pages = 0
 count_del_png = 0
 
-# # # # # # # # # # # # 
-# Running algorithm # #
-# # # # # # # # # # # # 
+# # # # # # # # # # #
+# Running algorithm #
+# # # # # # # # # # #
 
 os.chdir(use_dir)
-list_dirs = os.listdir()
-list_dirs.sort()
+list_dirs = [i for i in os.listdir() if os.path.isdir(i)]
+list_dirs.sort(key=lambda x: int(x.split()[x.split().index('Том')+1]))
 
 createDir(name_title)
 
@@ -124,7 +121,7 @@ print('\nВыполнена сортировка страниц и удален�
 
 os.chdir(name_title)
 list_dirs = os.listdir()
-list_dirs.sort()
+list_dirs.sort(key=lambda x: int(x.split()[x.split().index('Том')+1]))
 
 for item in list_dirs:
     try:
