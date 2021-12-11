@@ -4,7 +4,7 @@ from colorama import init as colorInit, Style, Fore, Back
 
 colorInit()
 
-print(Style.BRIGHT + Fore.CYAN + 'MangaCreatorPDF v1.4-beta\nFor files with Mangal1b\n' + Style.RESET_ALL)
+print(Style.BRIGHT + Fore.CYAN + 'MangaCreatorPDF v1.4.1-beta\nFor files with Mangal1b\n' + Style.RESET_ALL)
 
 def askDir():
     print('Введи путь к каталогу:')
@@ -61,6 +61,7 @@ count_del_png = 0
 os.chdir(use_dir)
 list_dirs = [i for i in os.listdir() if os.path.isdir(i)]
 list_dirs.sort(key=lambda x: int(x.split()[x.split().index('Том')+1]))
+list_dirs.sort(key=lambda x: float(x.split()[x.split().index('Глава')+1]))
 
 createDir(name_title)
 
