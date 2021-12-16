@@ -103,8 +103,9 @@ while repeat:
             print(Fore.YELLOW + '\nСтатистика:')
             for title, values in statistic.items():
                 print(str('"'+title+'" ').ljust(45, '.') + ' Томов: {} | Страниц: {} | Удалено PNG: {}'.format(values['parts'], values['pages'], values['png']))
+            print(Style.RESET_ALL, end='')
             break
         else:
             print(Fore.RED + '\nВведён не корректный ответ. Повтори ещё раз... ' + Fore.RESET)
 
-input(Style.RESET_ALL + '\nДля завершения программы, нажмите Enter...')
+input('\nДля завершения программы, нажмите Enter...')
