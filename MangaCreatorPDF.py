@@ -1,10 +1,10 @@
-import os, shutil, img2pdf
+import os, shutil, img2pdf, zipfile
 from os.path import normpath
 from colorama import init as colorInit, Style, Fore, Back
 
 colorInit()
 
-print(Style.BRIGHT + Fore.CYAN + 'MangaCreatorPDF v1.4.3-beta\nFor files with Mangal1b' + Style.RESET_ALL)
+print(Style.BRIGHT + Fore.CYAN + 'MangaCreatorPDF v1.5-beta\nFor files with Mangal1b' + Style.RESET_ALL)
 
 def askDir():
     print('\nВведи путь к каталогу:')
@@ -41,9 +41,9 @@ repeat = True
 
 while repeat:
     os.chdir(askDir())
-    list_dirs = [i for i in os.listdir() if os.path.isdir(i) and 'Глава' in i]
-    list_dirs.sort(key=lambda x: int(x.split()[x.split().index('Том')+1]))
-    list_dirs.sort(key=lambda x: float(x.split()[x.split().index('Глава')+1]))
+    list_zip = [i for i in os.listdir() if i.endswith(".zip") and 'Глава' in i]
+    list_zip.sort(key=lambda x: int(x.split()[x.split().index('Том')+1]))
+    list_zip.sort(key=lambda x: float(x.split()[x.split().index('Глава')+1]))
 
     name_title = os.path.basename(os.getcwd())
     createDir(name_title)
@@ -51,45 +51,47 @@ while repeat:
     
     statistic[name_title] = {'parts' : 0, 'pages' : 0, 'png' : 0}
 
-    for item in list_dirs:
-        current_part = item.split()[item.split().index('Том')+1]
-        partDir = name_title + ' Том ' + current_part
-        files = sorted(os.listdir('../' + item), key=lambda x: int(x.split('.')[0]))
-        
-        if int(current_part) > statistic[name_title]['parts']:
-            createDir(normpath(partDir))
-            num_page = 0 
-            statistic[name_title]['parts'] = int(current_part)
-        
-        for page in files:
-            new_name_file = str(num_page) + '.' + page.split('.')[1]
-            statistic[name_title]['pages'] += 1
+    print('\nРаспаковка архивов...')
+    
+    for item in list_zip:
+        with zipfile.ZipFile('../' + item) as zf:
+            current_part = item.split()[item.split().index('Том')+1]
+            partDir = name_title + ' Том ' + current_part
+            
+            if int(current_part) > statistic[name_title]['parts']:
+                if statistic[name_title]["parts"] != 0:
+                    print(f'Распакованы рахивы {statistic[name_title]["parts"]}-го тома')
+                
+                createDir(normpath(partDir))
+                num_page = 0 
+                statistic[name_title]['parts'] = int(current_part)
+            
+            for page in zf.infolist():
+                new_name = f'Page.{num_page}.{page.filename.split(".")[1]}'
+                statistic[name_title]['pages'] += 1
 
-            if not page.endswith(".png"):                               # Move images
-                os.replace(normpath('../' + item + '/' + page), normpath(partDir + '/' + new_name_file))
-            else:                                                       # DELETE PNG
-                os.remove(normpath('../' + item + '/' + page))
-                statistic[name_title]['png'] += 1
-            num_page += 1
-        
-        os.rmdir('../' + item)
+                if not page.filename.endswith(".png"):                      # Extract images
+                    zf.extract(page.filename, partDir)
+                    os.rename(normpath(partDir+'/'+page.filename), normpath(partDir+'/'+new_name))
+                else:
+                    statistic[name_title]['png'] += 1
+                    continue
+                num_page += 1
 
-    print('\nВыполнена сортировка страниц и удалены ненужные папки.\n')
-
-    print('Конвертация в PDF...')
+    print('\nСтраницы отсортированы.\n\nКонвертация в PDF...')
 
     list_dirs = [i for i in os.listdir() if os.path.isdir(i) and 'Том' in i]
     list_dirs.sort(key=lambda x: int(x.split()[x.split().index('Том')+1]))
 
     for item in list_dirs:
-        files = sorted(os.listdir(item), key=lambda x: int(x.split('.')[0]))
+        files = sorted(os.listdir(item), key=lambda x: int(x.split('.')[1]))
         with open(item+".pdf", "wb") as page:
             page.write(img2pdf.convert([normpath(item+'/'+i) for i in files]))
         print('Создан файл "' + item + '.pdf"')
 
     askDeletedImages(list_dirs)
 
-    print('\n' + Back.GREEN + Fore.BLACK + 'Конвертирование "{}" в PDF - завершено'.format(name_title) + Style.RESET_ALL)
+    print('\n' + Back.GREEN + Fore.BLACK + f'Конвертирование "{name_title}" в PDF - завершено' + Style.RESET_ALL)
     
     while True:
         user_answer = input('\nБудем ещё какую-то мангу конвертировать? [Y/n]: ')
@@ -102,7 +104,7 @@ while repeat:
             
             print(Fore.YELLOW + '\nСтатистика:')
             for title, values in statistic.items():
-                print(f'"{title}" '.ljust(45, '.') + f' Томов: {values["parts"]} | Страниц: {values["pages"]} | Удалено PNG: {values["png"]}')
+                print(f'"{title}" '.ljust(55, '.') + f' Томов: {values["parts"]} | Страниц: {values["pages"]} | Удалено PNG: {values["png"]}')
             print(Style.RESET_ALL, end='')
             break
         else:
