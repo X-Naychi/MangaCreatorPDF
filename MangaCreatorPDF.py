@@ -102,7 +102,7 @@ while repeat:
             
             print(Fore.YELLOW + '\nСтатистика:')
             for title, values in statistic.items():
-                print(str('"'+title+'" ').ljust(45, '.') + ' Томов: {} | Страниц: {} | Удалено PNG: {}'.format(values['parts'], values['pages'], values['png']))
+                print(f'"{title}" '.ljust(45, '.') + f' Томов: {values["parts"]} | Страниц: {values["pages"]} | Удалено PNG: {values["png"]}')
             print(Style.RESET_ALL, end='')
             break
         else:
