@@ -1,10 +1,11 @@
 import os, shutil, img2pdf, zipfile
 from os.path import normpath
 from colorama import init as colorInit, Style, Fore, Back
+from PIL import Image
 
 colorInit()
 
-print(Style.BRIGHT + Fore.CYAN + 'MangaCreatorPDF v1.5-beta\nFor files with Mangal1b' + Style.RESET_ALL)
+print(Style.BRIGHT + Fore.CYAN + 'MangaCreatorPDF v1.5.1-beta\nFor files with Mangal1b' + Style.RESET_ALL)
 
 def askDir():
     print('\nВведи путь к каталогу:')
@@ -36,6 +37,23 @@ def createDir(name):
     except FileExistsError:
         pass
 
+def checkImage(path, to_kb = 420, warning = True):
+    file_size = os.path.getsize(path)
+    if file_size/1024 > 1024:
+        if warning is not False:
+            print('\n' + Back.RED + Fore.BLACK + 'Внимание!' + Style.RESET_ALL)
+            print('При распаковке манги, были обнаружены страницы слишком высокого качества,')
+            print('поэтому в процессе этой задачи, каждая страница большого размера будет сжиматься.\nЭто может занять длительное время!\n')
+            warning = False
+        
+        quality_procentage = int(to_kb*1024 / file_size * 100)
+        with Image.open(path) as img:
+            img.save(path, "JPEG", quality=quality_procentage)
+        if not path.endswith(".jpeg"):
+            os.remove(path)
+
+    return warning
+
 statistic = {}
 repeat = True
 
@@ -49,7 +67,9 @@ while repeat:
     createDir(name_title)
     os.chdir(name_title)
     
-    statistic[name_title] = {'parts' : 0, 'pages' : 0, 'png' : 0}
+    statistic[name_title] = {'parts' : 0, 'pages' : 0, 'png' : 0, 'warning' : True}
+
+    # START EXTRACT
 
     print('\nРаспаковка архивов...')
     
@@ -73,10 +93,13 @@ while repeat:
                 if not page.filename.endswith(".png"):                      # Extract images
                     zf.extract(page.filename, partDir)
                     os.rename(normpath(partDir+'/'+page.filename), normpath(partDir+'/'+new_name))
+                    statistic[name_title]['warning'] = checkImage(normpath(partDir+'/'+new_name), warning=statistic[name_title]['warning'])
                 else:
                     statistic[name_title]['png'] += 1
                     continue
                 num_page += 1
+
+    # END EXTRACT
 
     print('\nСтраницы отсортированы.\n\nКонвертация в PDF...')
 
