@@ -92,7 +92,7 @@ while repeat:
 
                 if not page.filename.endswith(".png"):                      # Extract images
                     zf.extract(page.filename, partDir)
-                    os.rename(normpath(partDir+'/'+page.filename), normpath(partDir+'/'+new_name))
+                    os.replace(normpath(partDir+'/'+page.filename), normpath(partDir+'/'+new_name))
                     statistic[name_title]['warning'] = checkImage(normpath(partDir+'/'+new_name), warning=statistic[name_title]['warning'])
                 else:
                     statistic[name_title]['png'] += 1
