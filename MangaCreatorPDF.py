@@ -5,7 +5,7 @@ from PIL import Image
 
 colorInit()
 
-print(Style.BRIGHT + Fore.CYAN + 'MangaCreatorPDF v1.5.1-beta\nFor files with Mangal1b' + Style.RESET_ALL)
+print(Style.BRIGHT + Fore.CYAN + 'MangaCreatorPDF v1.5.2-beta\nFor files with Mangal1b' + Style.RESET_ALL)
 
 def askDir():
     print('\nВведи путь к каталогу:')
@@ -70,7 +70,7 @@ while repeat:
 
     # START EXTRACT
 
-    print('\nРаспаковка архивов...')
+    print('\nРаспаковка архивов:')
     
     for item in list_zip:
         with zipfile.ZipFile('../' + item) as zf:
@@ -78,8 +78,7 @@ while repeat:
             partDir = name_title + ' Том ' + current_part
             
             if int(current_part) > statistic[name_title]['parts']:
-                if statistic[name_title]["parts"] != 0:
-                    print(f'Распакованы рахивы {statistic[name_title]["parts"]}-го тома')
+                print(f'{current_part}-го тома...')
                 
                 createDir(normpath(partDir))
                 num_page = 0 
