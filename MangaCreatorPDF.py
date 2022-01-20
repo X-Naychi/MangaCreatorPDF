@@ -39,6 +39,7 @@ def createDir(name):
 
 def checkImage(path, to_kb = 420, warning = True):
     file_size = os.path.getsize(path)
+
     if file_size/1024 > 1024:
         if warning is not False:
             print('\n' + Back.RED + Fore.BLACK + 'Внимание!' + Style.RESET_ALL)
@@ -48,9 +49,7 @@ def checkImage(path, to_kb = 420, warning = True):
         
         quality_procentage = int(to_kb*1024 / file_size * 100)
         with Image.open(path) as img:
-            img.save(path, "JPEG", quality=quality_procentage)
-        if not path.endswith(".jpeg"):
-            os.remove(path)
+            img.save(path, path.split('.')[-1], quality=quality_procentage)
 
     return warning
 
@@ -67,7 +66,7 @@ while repeat:
     createDir(name_title)
     os.chdir(name_title)
     
-    statistic[name_title] = {'parts' : 0, 'pages' : 0, 'png' : 0, 'warning' : True}
+    statistic[name_title] = {'parts' : 0, 'pages' : 0, 'mismatched files' : 0, 'warning' : True}
 
     # START EXTRACT
 
@@ -90,12 +89,12 @@ while repeat:
                 new_name = f'Page.{num_page}.{page.filename.split(".")[1]}'
                 statistic[name_title]['pages'] += 1
 
-                if not page.filename.endswith(".png"):                      # Extract images
+                if page.filename.endswith(('jpeg', 'jpg', 'gif', 'tiff')):                      # Extract images
                     zf.extract(page.filename, partDir)
                     os.replace(normpath(partDir+'/'+page.filename), normpath(partDir+'/'+new_name))
                     statistic[name_title]['warning'] = checkImage(normpath(partDir+'/'+new_name), warning=statistic[name_title]['warning'])
                 else:
-                    statistic[name_title]['png'] += 1
+                    statistic[name_title]['mismatched files'] += 1
                     continue
                 num_page += 1
 
@@ -127,7 +126,7 @@ while repeat:
             
             print(Fore.YELLOW + '\nСтатистика:')
             for title, values in statistic.items():
-                print(f'"{title}" '.ljust(55, '.') + f' Томов: {values["parts"]} | Страниц: {values["pages"]} | Удалено PNG: {values["png"]}')
+                print(f'"{title}" '.ljust(55, '.') + f' Томов: {values["parts"]} | Страниц: {values["pages"]} | Несоответствующих файлов: {values["mismatched files"]}')
             print(Style.RESET_ALL, end='')
             break
         else:
