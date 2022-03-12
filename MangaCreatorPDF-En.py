@@ -5,30 +5,30 @@ from PIL import Image
 
 colorInit()
 
-print(Style.BRIGHT + Fore.CYAN + 'MangaCreatorPDF v1.5.2-beta\nFor files with Mangal1b' + Style.RESET_ALL)
+print(Style.BRIGHT + Fore.CYAN + 'MangaCreatorPDF v1.5.3\nFor files with Mangalib.me' + Style.RESET_ALL)
 
 def askDir():
-    print('\nВведи путь к каталогу:')
+    print('\nEnter the directory path:')
     data = input()
     if not data:
-        print(Fore.RED + 'Нельзя вводить пустоту. Повтори ещё раз...\n' + Fore.RESET)
+        print(Fore.RED + 'You cannot enter a void. Say it again...\n' + Fore.RESET)
         return askDir()
     elif not os.path.isdir(data):
-        print(Fore.RED + 'Эта папка не найдена. Проверь и повтори ещё раз...\n' + Fore.RESET)
+        print(Fore.RED + 'This folder was not found. Check and repeat...\n' + Fore.RESET)
         return askDir()
     else:
         return normpath(data)
 
 def askDeletedImages(dirs):
-    user_answer = input('\nУдалить отсортированные страницы манги? [Y/n]: ')
+    user_answer = input('\nDelete sorted manga pages? [Y/n]: ')
     if user_answer in ['Y', 'y', 'Д', 'д']:
         for item in dirs:
             shutil.rmtree(item, ignore_errors=True)
-        print(Back.RED + Fore.BLACK + 'Удалено!' + Style.RESET_ALL)
+        print(Back.RED + Fore.BLACK + 'Removed!' + Style.RESET_ALL)
     elif user_answer in ['N', 'n', 'Н', 'н']:
-        print('\nОтсортированные страницы и PDF файлы находятся по этому пути:\n"{}".\n'.format(Style.BRIGHT + Fore.YELLOW + os.getcwd() + Style.RESET_ALL))
+        return
     else:
-        print(Fore.RED + '\nВведён не корректный ответ. Повтори ещё раз... ' + Fore.RESET)
+        print(Fore.RED + '\nIncorrect answer entered. Say it again... ' + Fore.RESET)
         askDeletedImages(dirs)
 
 def createDir(name):
@@ -42,9 +42,9 @@ def checkImage(path, to_kb = 420, warning = True):
 
     if file_size/1024 > 1024:
         if warning is not False:
-            print('\n' + Back.RED + Fore.BLACK + 'Внимание!' + Style.RESET_ALL)
-            print('При распаковке манги, были обнаружены страницы слишком высокого качества,')
-            print('поэтому в процессе этой задачи, каждая страница большого размера будет сжиматься.\nЭто может занять длительное время!\n')
+            print('\n' + Back.RED + Fore.BLACK + 'Warning!' + Style.RESET_ALL)
+            print('When unpacking the manga, pages of too high quality were found,')
+            print('so during this task, each page of a large size will be compressed.\nThis may take a long time!\n')
             warning = False
         
         quality_procentage = int(to_kb*1024 / file_size * 100)
@@ -70,7 +70,7 @@ while repeat:
 
     # START EXTRACT
 
-    print('\nРаспаковка архивов:')
+    print('\nUnpacking archives:')
     
     for item in list_zip:
         with zipfile.ZipFile('../' + item) as zf:
@@ -78,7 +78,7 @@ while repeat:
             partDir = name_title + ' Том ' + current_part
             
             if int(current_part) > statistic[name_title]['parts']:
-                print(f'{current_part}-го тома...')
+                print(f'{current_part}st part...')
                 
                 createDir(normpath(partDir))
                 num_page = 0 
@@ -99,7 +99,7 @@ while repeat:
 
     # END EXTRACT
 
-    print('\nСтраницы отсортированы.\n\nКонвертация в PDF...')
+    print('\nThe pages are sorted.\n\nConvert to PDF...')
 
     list_dirs = [i for i in os.listdir() if os.path.isdir(i) and 'Том' in i]
     list_dirs.sort(key=lambda x: int(x.split()[x.split().index('Том')+1]))
@@ -108,14 +108,16 @@ while repeat:
         files = sorted(os.listdir(item), key=lambda x: int(x.split('.')[1]))
         with open(item+".pdf", "wb") as page:
             page.write(img2pdf.convert([normpath(item+'/'+i) for i in files]))
-        print('Создан файл "' + item + '.pdf"')
+        print('File created "' + item + '.pdf"')
 
     askDeletedImages(list_dirs)
 
-    print('\n' + Back.GREEN + Fore.BLACK + f'Конвертирование "{name_title}" в PDF - завершено' + Style.RESET_ALL)
+    print('\n' + Back.GREEN + Fore.BLACK + f'Convert Manga "{name_title}" to PDF - Completed' + Style.RESET_ALL)
+
+    print('\nThe generated files are in this path:\n"{}".'.format(Style.BRIGHT + Fore.YELLOW + os.getcwd() + Style.RESET_ALL))
     
     while True:
-        user_answer = input('\nБудем ещё какую-то мангу конвертировать? [Y/n]: ')
+        user_answer = input('\nShall we convert some more manga? [Y/n]: ')
 
         if user_answer in ['Y', 'y', 'Д', 'д']:
             print('\n'.ljust(30, '='))
@@ -123,12 +125,13 @@ while repeat:
         elif user_answer in ['N', 'n', 'Н', 'н']:
             repeat = False
             
-            print(Fore.YELLOW + '\nСтатистика:')
+            print(Fore.YELLOW + '\nStatistics:')
             for title, values in statistic.items():
-                print(f'"{title}" '.ljust(55, '.') + f' Томов: {values["parts"]} | Страниц: {values["pages"]} | Несоответствующих файлов: {values["mismatched files"]}')
+                print(f'"{title}" '.ljust(55, '.') + f' Parts: {values["parts"]} | Pages: {values["pages"]} | Mismatched files: {values["mismatched files"]}')
             print(Style.RESET_ALL, end='')
+            
             break
         else:
-            print(Fore.RED + '\nВведён не корректный ответ. Повтори ещё раз... ' + Fore.RESET)
+            print(Fore.RED + '\nIncorrect answer entered. Say it again... ' + Fore.RESET)
 
-input('\nДля завершения программы, нажмите Enter...')
+input('\nTo end the program, press Enter...')
