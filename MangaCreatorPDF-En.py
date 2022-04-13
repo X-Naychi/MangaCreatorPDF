@@ -107,7 +107,11 @@ while repeat:
     for item in list_dirs:
         files = sorted(os.listdir(item), key=lambda x: int(x.split('.')[1]))
         with open(item+".pdf", "wb") as page:
-            page.write(img2pdf.convert([normpath(item+'/'+i) for i in files]))
+            try:
+                page.write(img2pdf.convert([normpath(item+'/'+i) for i in files]))
+            except img2pdf.ImageOpenError: 
+                print('\n' + Back.RED + Fore.BLACK + 'The image file is unreadable or damaged! Conversion aborted.' + Style.RESET_ALL)
+                break
         print('File created "' + item + '.pdf"')
 
     askDeletedImages(list_dirs)
